@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-$latex            = 'uplatex -halt-on-error -file-line-error %O %S';
+$latex            = 'uplatex -synctex=1 -interaction=nonstopmode -file-line-error %O %S';
 $out_dir          = '/work/';
 $bibtex           = 'upbibtex';
 $dvipdf           = 'dvipdfmx %O -o %D %S';
