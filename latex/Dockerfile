@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-COPY .latexmkrc jlisting.sty texlive.profile /tmp/
+COPY .latexmkrc jlisting.sty ulem.sty texlive.profile /tmp/
 
 # trast jaist !!!
 RUN sed -i.bak -e "s%http://archive.ubuntu.com/ubuntu/%http://ftp.jaist.ac.jp/pub/Linux/ubuntu/%g" /etc/apt/sources.list \
@@ -16,8 +16,10 @@ RUN sed -i.bak -e "s%http://archive.ubuntu.com/ubuntu/%http://ftp.jaist.ac.jp/pu
   # latexmk だけ入ってないので
   && /usr/local/texlive/????/bin/*/tlmgr install latexmk \
   && /usr/local/texlive/????/bin/*/tlmgr path add \
-  # jlisting を使えるようにする
-  && cp /tmp/jlisting.sty /usr/local/texlive/????/texmf-dist/tex/latex/listing/ \
+  # jlisting, ulem を使えるようにする
+  && mv /tmp/jlisting.sty /usr/local/texlive/????/texmf-dist/tex/latex/listing/ \
+  && mkdir /tmp/ulem && mv /tmp/ulem.sty /tmp/ulem/ \
+  && mv /tmp/ulem/ /usr/local/texlive/????/texmf-dist/tex/latex/ \
   && mktexlsr \
   && mv /tmp/.latexmkrc / \
   && rm -rf /tmp/* \
