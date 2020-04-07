@@ -1,19 +1,26 @@
 FROM ubuntu:latest
 
-ENV DEBIAN_FRONTEND noninteractive
+COPY .latexmkrc jlisting.sty texlive.profile /tmp/
 
-COPY .latexmkrc /
-COPY jlisting.sty /usr/share/texlive/texmf-dist/tex/latex/listing/
-
-# jaist
-RUN sed -i.bak -e "s%http://archive.ubuntu.com/ubuntu/%http://ftp.jaist.ac.jp/pub/Linux/ubuntu/%g" /etc/apt/sources.list
-
-RUN apt update \
-  && apt install -y --no-install-recommends \
-    texlive-lang-japanese \
-    texlive-plain-generic texlive-latex-base texlive-latex-extra \
-    latexmk \
-  && rm -rf /var/lib/apt/lists/* \
-  && mktexlsr
+# trast jaist !!!
+RUN sed -i.bak -e "s%http://archive.ubuntu.com/ubuntu/%http://ftp.jaist.ac.jp/pub/Linux/ubuntu/%g" /etc/apt/sources.list \
+  && apt update \
+  && apt install -y curl perl \
+  && mkdir /tmp/install-tl-unx \
+  # jaist のリポジトリを使用
+  && repo="http://ftp.jaist.ac.jp/pub/CTAN/systems/texlive/tlnet" \
+  && curl -L ${repo}/install-tl-unx.tar.gz \
+  | tar -xz -C /tmp/install-tl-unx/ --strip-components=1 \
+  # texlive.profile でインストールする collection を指定。ソースファイル等を残さない
+  && /tmp/install-tl-unx/install-tl --profile=/tmp/texlive.profile --repository=${repo} \
+  # latexmk だけ入ってないので
+  && /usr/local/texlive/????/bin/*/tlmgr install latexmk \
+  && /usr/local/texlive/????/bin/*/tlmgr path add \
+  # jlisting を使えるようにする
+  && cp /tmp/jlisting.sty /usr/local/texlive/????/texmf-dist/tex/latex/listing/ \
+  && mktexlsr \
+  && mv /tmp/.latexmkrc / \
+  && rm -rf /tmp/* \
+  && rm -rf /var/lib/apt/lists/*
 
 CMD ["/bin/bash"]
