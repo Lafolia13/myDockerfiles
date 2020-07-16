@@ -19,7 +19,7 @@ RUN sed -i.bak -e "s%http://archive.ubuntu.com/ubuntu/%http://ftp.jaist.ac.jp/pu
   # styles に含まれているパッケージを使えるようにする
   && chmod +x /tmp/move_sty.sh && /tmp/move_sty.sh \
   && mktexlsr \
-  && mv /tmp/.latexmkrc / \
+  && mv /tmp/.latexmkrc ~ \
   && rm -rf /tmp/* \
   && rm -rf /var/lib/apt/lists/*
 
