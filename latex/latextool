@@ -17,13 +17,18 @@ fi
 
 dir=$(dirname ${2})
 base=$(basename ${2})
-real=$(echo $(pwd)/${base} | sed "s/^\///g" | sed "s/\//_/g")
+if [ ${dir} = "." ];then
+  real=$(echo $(pwd)/${base} | sed "s/^\///g" | sed "s/\//_/g")
+else
+  real=$(echo $(pwd)/$(echo ${dir} | sed "s/^.\///g")/${base} | sed "s/^\///g" | sed "s/\//_/g")
+fi
 
 if [ ${1} = "up" ]; then
   docker run --rm --name ${real} -itd -v "$(pwd):/workspace" -w "/workspace/${dir}" latex bash &&
+  echo "${real} is running" &&
   docker exec ${real} bash -c "if [ -f .latexmkrc ]; then cp .latexmkrc ~/; fi && latexmk -pvc ${base}" 2>&1 | egrep -A 2 -B 2 "up-to-date|^l." &
-  echo "${real} is running"
 else
-  docker kill ${real}
+  docker kill ${real} &&
+  echo "killed"
 fi
 
