@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if [ ! ${1} ] || [ ! ${2} ] || [ ${3} ] ; then
+  echo "Usage: $(basename "${0}") [up|down] [FILE]"
+  exit
+fi
+
+if [ ! ${1} = "up" ] && [ ! ${1} = "down" ]; then
+  echo "first argment is \"up\" or \"down\"" 1>&2
+  exit 1
+fi
+
+if [ ! -f ./${2} ]; then
+  echo "No such file" 1>&2
+  exit 1
+fi
+
+dir=$(dirname ${2})
+base=$(basename ${2})
+real=$(echo $(pwd)/${base} | sed "s/^\///g" | sed "s/\//_/g")
+
+if [ ${1} = "up" ]; then
+  docker run --rm --name ${real} -itd -v "$(pwd):/workspace" -w "/workspace/${dir}" latex bash &&
+  docker exec ${real} bash -c "if [ -f .latexmkrc ]; then cp .latexmkrc ~/; fi && latexmk -pvc ${base}" 2>&1 | egrep -A 2 -B 2 "up-to-date|^l." &
+  echo "${real} is running"
+else
+  docker kill ${real}
+fi
+
